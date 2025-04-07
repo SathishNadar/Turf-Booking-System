@@ -17,7 +17,7 @@ def index(request):
     if 'id' in request.session:
         user_id = request.session['id']
         request.session['id'] = user_id
-        dis = Registration.objects.using('rds').get(id=user_id)
+        dis = Registration.objects.get(id=user_id)
         return render(request, 'index.html',{'id': user_id,'dis':dis,'reg_turf': reg_turf,'reg_tournament':reg_tournament}) 
     else:  
         return render(request, 'index.html',{'reg_turf': reg_turf,'reg_tournament':reg_tournament})
@@ -29,7 +29,7 @@ def reg(request):
         pwd=request.POST.get('password')
         phone=request.POST.get('phone')
         role=request.POST.get('role')
-        if (Registration.objects.using('rds').filter(user_name=uname)).exists():
+        if (Registration.objects.filter(user_name=uname)).exists():
             return HttpResponse('User name already exist!!')
         ob=Registration()
         ob.user_name=uname
@@ -38,7 +38,7 @@ def reg(request):
         ob.user_phone=phone
         ob.role = role
         ob.status=0
-        ob.save(using='rds')
+        ob.save()
         return redirect('login')
     else:
         return redirect('login')
@@ -48,14 +48,13 @@ def login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
-        print("All users in RDS:", Registration.objects.using('rds').all())
-        if (Registration.objects.using('rds').filter(user_name=username, user_pass=password)).exists():
-            user_details = Registration.objects.using('rds').get(user_name=username, user_pass=password)
+        if (Registration.objects.filter(user_name=username, user_pass=password)).exists():
+            user_details = Registration.objects.filter(user_name=username, user_pass=password).first()
             user_id = user_details.id
             request.session['id'] = user_id
             return redirect('/')
         else:
-            print(f"Tried login with: {username}, {password}. User does not exist in RDS.")
+            print(f"Tried login with: {username}, {password}. User does not exist.")
             print('Login failed: wrong user name or password or account does not exist!!')
             return redirect('/')
     return render(request, 'login.html')
@@ -69,7 +68,7 @@ def about(request, id):
     details = Turfregistration.objects.get(id=id)
     if 'id' in request.session:
         user_id = request.session['id']
-        dis = Registration.objects.using('rds').get(id=user_id)
+        dis = Registration.objects.get(id=user_id)
         return render(request, 'about.html', {'id': user_id, 'details': details,'dis':dis})
     else:
         return render(request, 'about.html', {'details': details})
@@ -81,8 +80,8 @@ def tournament_about(request,id):
         turf_details = Turfregistration.objects.get(uid=reg_user)
         if 'id' in request.session:
             user_id = request.session['id']
-            dis = Registration.objects.using('rds').get(id=user_id)
-            reg_dis = Registration.objects.using('rds').get(id= reg_user)
+            dis = Registration.objects.get(id=user_id)
+            reg_dis = Registration.objects.get(id= reg_user)
             return render(request,'tournament_about.html', {'id': user_id,'dis':dis,'reg_tournament':reg_tournament,'turf_details':turf_details,'reg_dis':reg_dis})
         else:
             return render(request,'tournament_about.html', {'reg_tournament':reg_tournament,'turf_details':turf_details})
@@ -91,7 +90,7 @@ def tournament_about(request,id):
 
 def profile(request):
     user_id = request.session['id']
-    dis = Registration.objects.using('rds').get(id=user_id)
+    dis = Registration.objects.get(id=user_id)
     if 'organizer' in dis.role:
         turf_details = Turfregistration.objects.get(uid=user_id,is_available=1)
         reg_tournament=Host_Tournament.objects.filter(uid=user_id,is_available=1)
@@ -128,7 +127,7 @@ def search(request):
         if 'id' in request.session:
             user_id = request.session['id']
             request.session['id'] = user_id
-            dis = Registration.objects.using('rds').get(id=user_id)
+            dis = Registration.objects.get(id=user_id)
             if msg == " ":
                 return render(request, 'search.html',{'id': user_id,'dis':dis,'reg_turf': reg_turf,'reg_tournament':reg_tournament})
             else:
@@ -137,7 +136,7 @@ def search(request):
 
 def cancel(request,id):
     userid = request.session['id']
-    dis = Registration.objects.using('rds').get(id=userid)
+    dis = Registration.objects.get(id=userid)
     if 'organizer' in dis.role:
         Host_Tournament.objects.filter(is_available=1,id=id).update(is_available=0)
         return redirect('profile')
