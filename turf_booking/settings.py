@@ -28,9 +28,9 @@ PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET')
 PAYPAL_MODE = 'sandbox'  # Use 'live' for production
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['44.193.170.115', 'ec2-44-193-170-115.compute-1.amazonaws.com']
 
 # Application definition
 INSTALLED_APPS = [
